@@ -2,7 +2,13 @@ const mongoose = require("mongoose");
 
 const studentSchema = new mongoose.Schema(
 	{
+		// Derived full name for listings/search (e.g. "FirstName SurName")
 		name: {
+			type: String,
+			required: true,
+			trim: true,
+		},
+		surName: {
 			type: String,
 			required: true,
 			trim: true,
@@ -12,43 +18,74 @@ const studentSchema = new mongoose.Schema(
 			required: true,
 			trim: true,
 		},
-		middleName: {
-			type: String,
-			trim: true,
-		},
-		lastName: {
+		guardianName: {
 			type: String,
 			required: true,
 			trim: true,
 		},
-		fullNameMarathi: {
+		mothersName: {
+			type: String,
+			required: true,
+			trim: true,
+		},
+		subject: {
+			type: [String],
+			required: true,
+		},
+		batch: {
 			type: String,
 			trim: true,
+		},
+		address: {
+			type: String,
+			required: true,
+			trim: true,
+		},
+		aadhaarNumber: {
+			type: String,
+			required: true,
+			trim: true,
+			unique: true,
+		},
+		mobileNo: {
+			type: String,
+			required: true,
+			trim: true,
+		},
+		email: {
+			type: String,
+			trim: true,
+		},
+		birthPlace: {
+			type: String,
+			required: true,
+			trim: true,
+		},
+		dateOfBirth: {
+			type: Date,
+			required: true,
 		},
 		gender: {
 			type: String,
 			enum: ["Male", "Female", "Other"],
 			required: true,
 		},
-		dateOfBirth: {
-			type: Date,
+		handicapped: {
+			type: String,
+			enum: ["Yes", "No"],
 			required: true,
 		},
-		age: {
-			type: Number,
+		latestEducation: {
+			type: String,
 			required: true,
-			min: 1,
-		},
-		bloodGroup: {
-			type: String,
 			trim: true,
 		},
-		nationality: {
+		previousSchoolName: {
 			type: String,
+			required: true,
 			trim: true,
-			default: "Indian",
 		},
-		class: {
+		photo: {
 			type: String,
 			required: true,
 			trim: true,

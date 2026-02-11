@@ -1,11 +1,19 @@
 const Student = require('../models/student');
 
+const buildFullName = (data) => {
+  const parts = [];
+  if (data.firstName) {
+    parts.push(data.firstName);
+  }
+  if (data.surName) {
+    parts.push(data.surName);
+  }
+  return parts.join(' ').trim();
+};
+
 exports.addStudent = async (data) => {
   if (data) {
-    const nameParts = [data.firstName, data.middleName, data.lastName].filter(Boolean);
-    if (nameParts.length) {
-      data.name = nameParts.join(' ').trim();
-    }
+    data.name = buildFullName(data);
   }
   const student = new Student(data);
   return await student.save();
@@ -16,7 +24,7 @@ exports.getStudents = async ({ page = 1, limit = 10, search = '' }) => {
 
   if (search) {
     const regex = new RegExp(search, 'i');
-    query.$or = [{ name: regex }, { class: regex }];
+    query.$or = [{ name: regex }, { mobileNo: regex }, { batch: regex }];
   }
 
   const skip = (page - 1) * limit;
@@ -37,16 +45,12 @@ exports.getStudentById = async (id) => {
 };
 
 exports.updateStudent = async (id, data) => {
-  if (data && (data.firstName || data.middleName || data.lastName)) {
+  if (data && (data.firstName || data.surName)) {
     const existing = await Student.findById(id);
     if (existing) {
       const firstName = data.firstName ?? existing.firstName;
-      const middleName = data.middleName ?? existing.middleName;
-      const lastName = data.lastName ?? existing.lastName;
-      const nameParts = [firstName, middleName, lastName].filter(Boolean);
-      if (nameParts.length) {
-        data.name = nameParts.join(' ').trim();
-      }
+      const surName = data.surName ?? existing.surName;
+      data.name = buildFullName({ firstName, surName });
     }
   }
   return await Student.findByIdAndUpdate(id, data, { new: true });
