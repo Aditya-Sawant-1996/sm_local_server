@@ -1,4 +1,4 @@
-const Student = require('../models/student');
+const Student = require("../models/student");
 
 const buildFullName = (data) => {
   const parts = [];
@@ -8,7 +8,7 @@ const buildFullName = (data) => {
   if (data.surName) {
     parts.push(data.surName);
   }
-  return parts.join(' ').trim();
+  return parts.join(" ").trim();
 };
 
 exports.addStudent = async (data) => {
@@ -19,21 +19,22 @@ exports.addStudent = async (data) => {
   return await student.save();
 };
 
-exports.getStudents = async ({ page = 1, limit = 10, search = '' }) => {
+exports.getStudents = async ({ page = 1, limit = 10, search = "" }) => {
   const query = {};
 
   if (search) {
-    const regex = new RegExp(search, 'i');
-    query.$or = [{ name: regex }, { mobileNo: regex }, { batch: regex }];
+    const regex = new RegExp(search, "i");
+    query.$or = [
+      { name: regex },
+      { mobileNo: regex },
+      { aadhaarNumber: regex },
+    ];
   }
 
   const skip = (page - 1) * limit;
 
   const [data, total] = await Promise.all([
-    Student.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit),
+    Student.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
     Student.countDocuments(query),
   ]);
 
