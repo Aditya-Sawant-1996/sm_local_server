@@ -20,7 +20,7 @@ exports.addStudent = async (data) => {
 };
 
 exports.getStudents = async ({ page = 1, limit = 10, search = "" }) => {
-  const query = {};
+  const query = { isDeleted: false };
 
   if (search) {
     const regex = new RegExp(search, "i");
@@ -42,7 +42,7 @@ exports.getStudents = async ({ page = 1, limit = 10, search = "" }) => {
 };
 
 exports.getStudentById = async (id) => {
-  return await Student.findById(id);
+  return await Student.findOne({ _id: id, isDeleted: false });
 };
 
 exports.updateStudent = async (id, data) => {
@@ -54,9 +54,15 @@ exports.updateStudent = async (id, data) => {
       data.name = buildFullName({ firstName, surName });
     }
   }
-  return await Student.findByIdAndUpdate(id, data, { new: true });
+  return await Student.findOneAndUpdate({ _id: id, isDeleted: false }, data, {
+    new: true,
+  });
 };
 
 exports.deleteStudent = async (id) => {
-  return await Student.findByIdAndDelete(id);
+  return await Student.findOneAndUpdate(
+    { _id: id, isDeleted: false },
+    { isDeleted: true },
+    { new: true }
+  );
 };

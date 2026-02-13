@@ -2,6 +2,13 @@ const studentService = require('../service/studentService');
 
 exports.addStudent = async (req, res) => {
   try {
+    if (req.body.selectedSubjects && typeof req.body.selectedSubjects === 'string') {
+      try {
+        req.body.selectedSubjects = JSON.parse(req.body.selectedSubjects);
+      } catch (e) {
+        // ignore parse errors and let validation/model handle it
+      }
+    }
     const student = await studentService.addStudent(req.body);
     res.json({ success: true, student });
   } catch (err) {
@@ -36,6 +43,13 @@ exports.getStudentById = async (req, res) => {
 
 exports.updateStudent = async (req, res) => {
   try {
+    if (req.body.selectedSubjects && typeof req.body.selectedSubjects === 'string') {
+      try {
+        req.body.selectedSubjects = JSON.parse(req.body.selectedSubjects);
+      } catch (e) {
+        // ignore parse errors and let validation/model handle it
+      }
+    }
     const student = await studentService.updateStudent(req.params.id, req.body);
     if (!student) {
       return res.status(404).json({ success: false, message: 'Student not found' });

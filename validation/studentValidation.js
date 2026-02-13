@@ -21,8 +21,7 @@ exports.addStudent = [
     .matches(namePattern)
     .withMessage('guardianName must contain only letters'),
   body('mothersName')
-    .notEmpty()
-    .withMessage('mothersName is required')
+    .optional({ checkFalsy: true })
     .matches(namePattern)
     .withMessage('mothersName must contain only letters'),
   body('subject')
@@ -33,10 +32,9 @@ exports.addStudent = [
       }
       return true;
     }),
-  body('address').notEmpty().withMessage('address is required'),
+  body('address').optional({ checkFalsy: true }),
   body('aadhaarNumber')
-    .notEmpty()
-    .withMessage('aadhaarNumber is required')
+    .optional({ checkFalsy: true })
     .matches(aadhaarPattern)
     .withMessage('aadhaarNumber must be 12 digits'),
   body('mobileNo')
@@ -45,28 +43,21 @@ exports.addStudent = [
     .matches(mobilePattern)
     .withMessage('mobileNo must be 10 digits'),
   body('email').optional({ checkFalsy: true }).isEmail().withMessage('Invalid email'),
-  body('birthPlace').notEmpty().withMessage('birthPlace is required'),
+  body('birthPlace').optional({ checkFalsy: true }),
   body('dateOfBirth')
-    .notEmpty()
-    .withMessage('dateOfBirth is required')
+    .optional({ checkFalsy: true })
     .isISO8601()
     .withMessage('Invalid dateOfBirth'),
   body('gender')
-    .notEmpty()
-    .withMessage('gender is required')
+    .optional({ checkFalsy: true })
     .isIn(['Male', 'Female', 'Other'])
     .withMessage('Invalid gender value'),
   body('handicapped')
-    .notEmpty()
-    .withMessage('handicapped is required')
+    .optional({ checkFalsy: true })
     .isIn(['Yes', 'No'])
     .withMessage('Invalid handicapped value'),
-  body('latestEducation')
-    .notEmpty()
-    .withMessage('latestEducation is required'),
-  body('previousSchoolName')
-    .notEmpty()
-    .withMessage('previousSchoolName is required'),
+  body('latestEducation').optional({ checkFalsy: true }),
+  body('previousSchoolName').optional({ checkFalsy: true }),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -91,7 +82,7 @@ exports.updateStudent = [
     .matches(namePattern)
     .withMessage('guardianName must contain only letters'),
   body('mothersName')
-    .optional()
+    .optional({ checkFalsy: true })
     .matches(namePattern)
     .withMessage('mothersName must contain only letters'),
   body('subject')
@@ -103,7 +94,7 @@ exports.updateStudent = [
       }
       return true;
     }),
-  body('address').optional().notEmpty().withMessage('address is required'),
+  body('address').optional({ checkFalsy: true }),
   body('aadhaarNumber')
     .optional()
     .matches(aadhaarPattern)
@@ -116,7 +107,7 @@ exports.updateStudent = [
     .optional({ checkFalsy: true })
     .isEmail()
     .withMessage('Invalid email'),
-  body('birthPlace').optional().notEmpty().withMessage('birthPlace is required'),
+  body('birthPlace').optional({ checkFalsy: true }),
   body('dateOfBirth')
     .optional()
     .isISO8601()
@@ -129,8 +120,8 @@ exports.updateStudent = [
     .optional()
     .isIn(['Yes', 'No'])
     .withMessage('Invalid handicapped value'),
-  body('latestEducation').optional().notEmpty().withMessage('latestEducation is required'),
-  body('previousSchoolName').optional().notEmpty().withMessage('previousSchoolName is required'),
+  body('latestEducation').optional({ checkFalsy: true }),
+  body('previousSchoolName').optional({ checkFalsy: true }),
 
   (req, res, next) => {
     const errors = validationResult(req);

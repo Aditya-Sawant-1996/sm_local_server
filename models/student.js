@@ -25,7 +25,6 @@ const studentSchema = new mongoose.Schema(
 		},
 		mothersName: {
 			type: String,
-			required: true,
 			trim: true,
 		},
 		subject: {
@@ -38,12 +37,10 @@ const studentSchema = new mongoose.Schema(
 		},
 		address: {
 			type: String,
-			required: true,
 			trim: true,
 		},
 		aadhaarNumber: {
 			type: String,
-			required: true,
 			trim: true,
 			unique: true,
 		},
@@ -58,37 +55,49 @@ const studentSchema = new mongoose.Schema(
 		},
 		birthPlace: {
 			type: String,
-			required: true,
 			trim: true,
 		},
 		dateOfBirth: {
 			type: Date,
-			required: true,
 		},
 		gender: {
 			type: String,
 			enum: ["Male", "Female", "Other"],
-			required: true,
 		},
 		handicapped: {
 			type: String,
 			enum: ["Yes", "No"],
-			required: true,
 		},
 		latestEducation: {
 			type: String,
-			required: true,
 			trim: true,
 		},
 		previousSchoolName: {
 			type: String,
-			required: true,
 			trim: true,
 		},
 		photo: {
 			type: String,
 			required: true,
 			trim: true,
+		},
+		selectedSubjects: [
+			{
+				_id: {
+					type: mongoose.Schema.Types.ObjectId,
+					ref: "Subject",
+					required: true,
+				},
+				name: {
+					type: String,
+					required: true,
+					trim: true,
+				},
+			},
+		],
+		isDeleted: {
+			type: Boolean,
+			default: false,
 		},
 	},
 	{

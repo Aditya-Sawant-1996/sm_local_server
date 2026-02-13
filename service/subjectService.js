@@ -20,7 +20,7 @@ exports.addSubject = async (data) => {
 };
 
 exports.getSubjects = async ({ page = 1, limit = 10, search = "" }) => {
-  const query = {};
+  const query = { isDeleted: false };
 
   if (search) {
     const regex = new RegExp(search, "i");
@@ -38,13 +38,19 @@ exports.getSubjects = async ({ page = 1, limit = 10, search = "" }) => {
 };
 
 exports.getSubjectById = async (id) => {
-  return await Subject.findById(id);
+  return await Subject.findOne({ _id: id, isDeleted: false });
 };
 
 exports.updateSubject = async (id, data) => {
-  return await Subject.findByIdAndUpdate(id, data, { new: true });
+  return await Subject.findOneAndUpdate({ _id: id, isDeleted: false }, data, {
+    new: true,
+  });
 };
 
 exports.deleteSubject = async (id) => {
-  return await Subject.findByIdAndDelete(id);
+  return await Subject.findOneAndUpdate(
+    { _id: id, isDeleted: false },
+    { isDeleted: true },
+    { new: true }
+  );
 };

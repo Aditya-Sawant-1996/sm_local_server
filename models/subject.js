@@ -8,6 +8,10 @@ const subjectSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

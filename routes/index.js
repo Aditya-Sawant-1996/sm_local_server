@@ -5,5 +5,6 @@ const router = express.Router();
 router.use("/auth", require("./authRoutes"));
 router.use("/students", require("./studentRoutes"));
 router.use("/subjects", require("./subjectRoutes"));
+router.use("/fees", require("./feesRoutes"));
 
 module.exports = router;
