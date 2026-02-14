@@ -12,6 +12,21 @@ exports.addStudent = async (req, res) => {
     const student = await studentService.addStudent(req.body);
     res.json({ success: true, student });
   } catch (err) {
+    if (err && (err.code === 11000 || err.code === "AADHAAR_DUP")) {
+      const key =
+        (Object.keys(err.keyPattern || {})[0] ||
+          Object.keys(err.keyValue || {})[0] ||
+          'field');
+      let message = 'Duplicate value.';
+      if (key === 'aadhaarNumber' || err.code === "AADHAAR_DUP") {
+        message = 'Aadhaar number already exists.';
+      } else if (key === 'mobileNo') {
+        message = 'Mobile number already exists.';
+      } else {
+        message = `Duplicate value for ${key}.`;
+      }
+      return res.status(400).json({ success: false, message });
+    }
     res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -56,6 +71,21 @@ exports.updateStudent = async (req, res) => {
     }
     res.json({ success: true, student });
   } catch (err) {
+    if (err && (err.code === 11000 || err.code === "AADHAAR_DUP")) {
+      const key =
+        (Object.keys(err.keyPattern || {})[0] ||
+          Object.keys(err.keyValue || {})[0] ||
+          'field');
+      let message = 'Duplicate value.';
+      if (key === 'aadhaarNumber' || err.code === "AADHAAR_DUP") {
+        message = 'Aadhaar number already exists.';
+      } else if (key === 'mobileNo') {
+        message = 'Mobile number already exists.';
+      } else {
+        message = `Duplicate value for ${key}.`;
+      }
+      return res.status(400).json({ success: false, message });
+    }
     res.status(500).json({ success: false, message: err.message });
   }
 };

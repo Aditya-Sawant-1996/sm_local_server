@@ -35,15 +35,6 @@ const upload = multer({
 	limits: { fileSize: 5 * 1024 * 1024 },
 	fileFilter,
 });
-
-const ensurePhotoOnCreate = (req, res, next) => {
-	if (!req.file) {
-		return res.status(400).json({ success: false, message: 'Photo is required and must be an image up to 5MB' });
-	}
-	req.body.photo = `/uploads/${req.file.filename}`;
-	next();
-};
-
 const attachPhotoIfPresent = (req, res, next) => {
 	if (req.file) {
 		req.body.photo = `/uploads/${req.file.filename}`;
@@ -55,7 +46,7 @@ const attachPhotoIfPresent = (req, res, next) => {
 router.post(
 	'/',
 	upload.single('photo'),
-	ensurePhotoOnCreate,
+	attachPhotoIfPresent,
 	studentValidation.addStudent,
 	studentController.addStudent,
 );

@@ -29,7 +29,9 @@ exports.addFees = [
     .withMessage('totalInstallments must be at least 1'),
   body('instalmentNumber')
     .notEmpty()
-    .withMessage('instalmentNumber is required'),
+    .withMessage('instalmentNumber is required')
+    .isInt({ min: 1 })
+    .withMessage('instalmentNumber must be a positive integer'),
   body('feesPaid')
     .notEmpty()
     .withMessage('feesPaid is required')
@@ -65,8 +67,8 @@ exports.updateFees = [
     .withMessage('totalInstallments must be at least 1'),
   body('instalmentNumber')
     .optional()
-    .notEmpty()
-    .withMessage('instalmentNumber is required'),
+    .isInt({ min: 1 })
+    .withMessage('instalmentNumber must be a positive integer'),
   body('feesPaid')
     .optional()
     .isFloat({ min: 0 })

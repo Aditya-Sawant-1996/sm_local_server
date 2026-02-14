@@ -18,6 +18,11 @@ const feesSchema = new mongoose.Schema(
         required: true,
         trim: true,
       },
+      mobileNo: {
+        type: String,
+        required: true,
+        trim: true,
+      },
       subjects: {
         type: [String],
         required: true,
@@ -47,9 +52,9 @@ const feesSchema = new mongoose.Schema(
       min: 0,
     },
     instalmentNumber: {
-      type: String,
+      type: Number,
       required: true,
-      trim: true,
+      min: 1,
     },
     feesPaid: {
       type: Number,

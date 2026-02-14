@@ -96,7 +96,7 @@ exports.updateStudent = [
     }),
   body('address').optional({ checkFalsy: true }),
   body('aadhaarNumber')
-    .optional()
+		.optional({ checkFalsy: true })
     .matches(aadhaarPattern)
     .withMessage('aadhaarNumber must be 12 digits'),
   body('mobileNo')

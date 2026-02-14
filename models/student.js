@@ -42,7 +42,6 @@ const studentSchema = new mongoose.Schema(
 		aadhaarNumber: {
 			type: String,
 			trim: true,
-			unique: true,
 		},
 		mobileNo: {
 			type: String,
@@ -78,7 +77,6 @@ const studentSchema = new mongoose.Schema(
 		},
 		photo: {
 			type: String,
-			required: true,
 			trim: true,
 		},
 		selectedSubjects: [
@@ -104,6 +102,34 @@ const studentSchema = new mongoose.Schema(
 		timestamps: true,
 	}
 );
+// Ensure aadhaarNumber is unique only when it is actually provided
+// and is a non-empty string. Documents without Aadhaar (or with
+// null/empty) will not participate in this index.
+studentSchema.index(
+	{ aadhaarNumber: 1 },
+	{
+		unique: true,
+		partialFilterExpression: {
+			aadhaarNumber: { $type: "string", $ne: "" },
+		},
+	},
+);
 
-module.exports = mongoose.model("Student", studentSchema);
+// Ensure mobileNo is always unique (mobile number is required).
+studentSchema.index({ mobileNo: 1 }, { unique: true });
+
+const Student = mongoose.model("Student", studentSchema);
+
+// Best-effort migration: drop any legacy non-partial Aadhaar index
+// that may still be present, so our partial unique index can take effect.
+// This runs on startup and is safe if the index does not exist.
+Student.collection
+	.dropIndex("aadhaarNumber_1")
+	.catch(() => {})
+	.finally(() => {
+		// Ensure indexes match the schema definitions.
+		Student.syncIndexes().catch(() => {});
+	});
+
+module.exports = Student;
 

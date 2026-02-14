@@ -37,6 +37,25 @@ exports.getFeesById = async (req, res) => {
   }
 };
 
+exports.getFeesSummaryByStudent = async (req, res) => {
+  try {
+    const data = await feesService.getFeesSummaryByStudent();
+    res.json({ success: true, data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+exports.getLastFeesForStudent = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const fees = await feesService.getLastFeesForStudent(studentId);
+    res.json({ success: true, fees });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 exports.updateFees = async (req, res) => {
   try {
     const fees = await feesService.updateFees(req.params.id, req.body);

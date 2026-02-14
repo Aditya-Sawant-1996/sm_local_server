@@ -17,14 +17,21 @@ exports.addFees = async (data) => {
     studentId: student._id,
     name: student.name,
     aadhaarNumber: student.aadhaarNumber,
+    mobileNo: student.mobileNo,
     subjects: student.subject || [],
   };
 
   const totalFees = Number(data.totalFees);
   const totalInstallments = Number(data.totalInstallments);
   const feesPaid = Number(data.feesPaid);
+  const instalmentNumber = Number(data.instalmentNumber);
 
-  if (!Number.isFinite(totalFees) || !Number.isFinite(totalInstallments) || !Number.isFinite(feesPaid)) {
+  if (
+    !Number.isFinite(totalFees) ||
+    !Number.isFinite(totalInstallments) ||
+    !Number.isFinite(feesPaid) ||
+    !Number.isFinite(instalmentNumber)
+  ) {
     const err = new Error("Invalid numeric values for fees");
     err.code = "INVALID_NUMERIC";
     throw err;
@@ -39,7 +46,7 @@ exports.addFees = async (data) => {
     totalFees,
     totalInstallments,
     monthlyInstallments,
-    instalmentNumber: data.instalmentNumber,
+    instalmentNumber,
     feesPaid,
     date: data.date,
   });
@@ -75,6 +82,82 @@ exports.getFeesById = async (id) => {
   return await Fees.findOne({ _id: id, isDeleted: false });
 };
 
+// Aggregate fees by student to produce a single summary row per student.
+exports.getFeesSummaryByStudent = async () => {
+  // Group all non-deleted fees records by student
+  const agg = await Fees.aggregate([
+    {
+      $match: { isDeleted: false },
+    },
+    {
+      $group: {
+        _id: "$selectedStudent.studentId",
+        lastPaymentDate: { $max: "$date" },
+        totalFees: { $max: "$totalFees" },
+        totalInstallments: { $max: "$totalInstallments" },
+        monthlyInstallments: { $max: "$monthlyInstallments" },
+        totalPaid: { $sum: "$feesPaid" },
+      },
+    },
+  ]);
+
+  if (!agg.length) {
+    return [];
+  }
+
+  const studentIds = agg.map((row) => row._id).filter(Boolean);
+  const students = await Student.find({
+    _id: { $in: studentIds },
+    isDeleted: false,
+  });
+  const studentMap = new Map();
+  for (const s of students) {
+    studentMap.set(String(s._id), s);
+  }
+
+  return agg.map((row) => {
+    const student = studentMap.get(String(row._id));
+    let name = "";
+    let subjects = [];
+    if (student) {
+      const parts = [];
+      if (student.surName) parts.push(student.surName);
+      if (student.firstName) parts.push(student.firstName);
+      if (student.guardianName) parts.push(student.guardianName);
+      name = parts.join(" ");
+      subjects = Array.isArray(student.subject) ? student.subject : [];
+    }
+
+    const totalFees = row.totalFees ?? 0;
+    const totalInstallments = row.totalInstallments ?? 0;
+    const monthlyInstallments = row.monthlyInstallments ?? 0;
+    const totalPaid = row.totalPaid ?? 0;
+    const amountDue = Math.max(0, totalFees - totalPaid);
+
+    return {
+      studentId: row._id,
+      name,
+      subjects,
+      totalInstallments,
+      totalFees,
+      monthlyInstallments,
+      totalPaid,
+      amountDue,
+      lastPaymentDate: row.lastPaymentDate,
+    };
+  });
+};
+
+exports.getLastFeesForStudent = async (studentId) => {
+  if (!studentId) {
+    return null;
+  }
+  return await Fees.findOne({
+    "selectedStudent.studentId": studentId,
+    isDeleted: false,
+  }).sort({ date: -1, createdAt: -1 });
+};
+
 exports.updateFees = async (id, data) => {
   const update = { ...data };
 
@@ -89,6 +172,7 @@ exports.updateFees = async (id, data) => {
       studentId: student._id,
       name: student.name,
       aadhaarNumber: student.aadhaarNumber,
+      mobileNo: student.mobileNo,
       subjects: student.subject || [],
     };
     update.subjects = update.selectedStudent.subjects;
