@@ -13,6 +13,9 @@ router.get('/', feesController.getFees);
 // Export summary by student (one row per student)
 router.get('/summary/by-student', feesController.getFeesSummaryByStudent);
 
+// Monthly fees summary for dashboard (grouped by month/year)
+router.get('/summary/monthly', feesController.getMonthlyFeesSummary);
+
 // Read last fees for a student
 router.get('/by-student/:studentId/last', feesController.getLastFeesForStudent);
 

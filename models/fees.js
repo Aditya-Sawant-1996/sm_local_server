@@ -15,7 +15,6 @@ const feesSchema = new mongoose.Schema(
       },
       aadhaarNumber: {
         type: String,
-        required: true,
         trim: true,
       },
       mobileNo: {
@@ -26,6 +25,12 @@ const feesSchema = new mongoose.Schema(
       subjects: {
         type: [String],
         required: true,
+      },
+      batchStart: {
+        type: Date,
+      },
+      batchEnd: {
+        type: Date,
       },
     },
     subjects: {

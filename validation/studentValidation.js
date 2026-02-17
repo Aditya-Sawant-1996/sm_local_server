@@ -32,6 +32,31 @@ exports.addStudent = [
       }
       return true;
     }),
+  body('batchStart')
+    .notEmpty()
+    .withMessage('batchStart is required')
+    .isISO8601()
+    .withMessage('batchStart must be a valid date'),
+  body('batchEnd')
+    .notEmpty()
+    .withMessage('batchEnd is required')
+    .isISO8601()
+    .withMessage('batchEnd must be a valid date')
+    .custom((value, { req }) => {
+      const start = req.body.batchStart;
+      if (!start) {
+        return true;
+      }
+      const startDate = new Date(start);
+      const endDate = new Date(value);
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        throw new Error('Invalid batchStart or batchEnd');
+      }
+      if (startDate > endDate) {
+        throw new Error('batchEnd must be on or after batchStart');
+      }
+      return true;
+    }),
   body('address').optional({ checkFalsy: true }),
   body('aadhaarNumber')
     .optional({ checkFalsy: true })
@@ -122,6 +147,29 @@ exports.updateStudent = [
     .withMessage('Invalid handicapped value'),
   body('latestEducation').optional({ checkFalsy: true }),
   body('previousSchoolName').optional({ checkFalsy: true }),
+  body('batchStart')
+    .optional({ checkFalsy: true })
+    .isISO8601()
+    .withMessage('batchStart must be a valid date'),
+  body('batchEnd')
+    .optional({ checkFalsy: true })
+    .isISO8601()
+    .withMessage('batchEnd must be a valid date')
+    .custom((value, { req }) => {
+      const start = req.body.batchStart;
+      if (!start) {
+        return true;
+      }
+      const startDate = new Date(start);
+      const endDate = new Date(value);
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        throw new Error('Invalid batchStart or batchEnd');
+      }
+      if (startDate > endDate) {
+        throw new Error('batchEnd must be on or after batchStart');
+      }
+      return true;
+    }),
 
   (req, res, next) => {
     const errors = validationResult(req);

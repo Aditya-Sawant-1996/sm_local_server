@@ -46,6 +46,17 @@ exports.getFeesSummaryByStudent = async (req, res) => {
   }
 };
 
+exports.getMonthlyFeesSummary = async (req, res) => {
+  try {
+    const yearParam = req.query.year;
+    const year = yearParam ? parseInt(yearParam, 10) : undefined;
+    const data = await feesService.getMonthlyFeesSummary(year);
+    res.json({ success: true, data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 exports.getLastFeesForStudent = async (req, res) => {
   try {
     const { studentId } = req.params;

@@ -35,6 +35,14 @@ const studentSchema = new mongoose.Schema(
 			type: String,
 			trim: true,
 		},
+		batchStart: {
+			type: Date,
+			required: true,
+		},
+		batchEnd: {
+			type: Date,
+			required: true,
+		},
 		address: {
 			type: String,
 			trim: true,
