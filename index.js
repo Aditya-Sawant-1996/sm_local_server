@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 require("dotenv").config();
+const { initBackupScheduler } = require("./service/backupService");
 
 const app = express();
 const PORT = 3000;
@@ -18,7 +19,12 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("MongoDB connected"))
+  .then(() => {
+    console.log("MongoDB connected");
+    initBackupScheduler().catch((err) => {
+      console.error("Backup scheduler failed to start:", err);
+    });
+  })
   .catch((err) => console.error(err));
 
 // Routes

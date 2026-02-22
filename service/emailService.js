@@ -22,6 +22,11 @@ function getTransporter() {
   return transporter;
 }
 
+async function renderTemplate(templateName, data) {
+  const templatePath = path.join(__dirname, "../views/email", templateName);
+  return ejs.renderFile(templatePath, data);
+}
+
 async function sendOtpEmail({
   to,
   name,
@@ -35,8 +40,7 @@ async function sendOtpEmail({
 
   const templateName =
     purpose === "reset" ? "reset-otp.ejs" : "otp.ejs";
-  const templatePath = path.join(__dirname, "../views/email", templateName);
-  const html = await ejs.renderFile(templatePath, {
+  const html = await renderTemplate(templateName, {
     name,
     otp,
     expiresInMinutes,
@@ -60,6 +64,48 @@ async function sendOtpEmail({
   });
 }
 
+async function sendBackupEmail({
+  to,
+  name,
+  instituteName,
+  backupDateTime,
+  fileName,
+  filePath,
+  tables,
+}) {
+  if (!EMAIL_USER || !EMAIL_PASS || !FROM_EMAIL) {
+    throw new Error("Email configuration is missing");
+  }
+
+  const html = await renderTemplate("backup.ejs", {
+    name,
+    instituteName,
+    backupDateTime,
+    fileName,
+    tables,
+  });
+
+  const subject = `${instituteName || "Institute"} monthly backup`;
+  const text = `Hello ${name || "there"}, your backup for ${
+    instituteName || "your institute"
+  } was created on ${backupDateTime}. The attached file is ${fileName}.`;
+
+  return getTransporter().sendMail({
+    from: FROM_EMAIL,
+    to,
+    subject,
+    html,
+    text,
+    attachments: [
+      {
+        filename: fileName,
+        path: filePath,
+      },
+    ],
+  });
+}
+
 module.exports = {
   sendOtpEmail,
+  sendBackupEmail,
 };
