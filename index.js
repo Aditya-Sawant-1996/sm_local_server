@@ -10,7 +10,7 @@ const PORT = 3000;
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "10mb" }));
 app.use('/uploads', express.static('uploads'));
 
 // Connect MongoDB

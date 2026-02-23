@@ -6,6 +6,7 @@ const systemUserSchema = new mongoose.Schema(
     email: { type: String, required: true, trim: true, lowercase: true },
     instituteName: { type: String, required: true, trim: true },
     password: { type: String, required: true },
+    instituteLogo: { type: String, default: "" },
   },
   {
     timestamps: true,

@@ -46,7 +46,10 @@ function isHashedPassword(password) {
 
 exports.hasSystemUser = async (req, res) => {
   try {
-    const systemUser = await SystemUser.findOne({}, "name email instituteName");
+    const systemUser = await SystemUser.findOne(
+      {},
+      "name email instituteName instituteLogo"
+    );
     return res.json({
       success: true,
       exists: !!systemUser,
@@ -56,6 +59,7 @@ exports.hasSystemUser = async (req, res) => {
             name: systemUser.name,
             email: systemUser.email,
             instituteName: systemUser.instituteName,
+            instituteLogo: systemUser.instituteLogo || "",
           }
         : null,
     });
@@ -120,6 +124,7 @@ exports.createSystemUser = async (req, res) => {
         name: systemUser.name,
         email: systemUser.email,
         instituteName: systemUser.instituteName,
+        instituteLogo: systemUser.instituteLogo || "",
       },
     });
   } catch (err) {
@@ -233,6 +238,7 @@ exports.login = async (req, res) => {
         name: systemUser.name,
         email: systemUser.email,
         instituteName: systemUser.instituteName,
+        instituteLogo: systemUser.instituteLogo || "",
       },
     });
   } catch (err) {
@@ -359,6 +365,7 @@ exports.resetPassword = async (req, res) => {
         name: systemUser.name,
         email: systemUser.email,
         instituteName: systemUser.instituteName,
+        instituteLogo: systemUser.instituteLogo || "",
       },
     });
   } catch (err) {
@@ -367,5 +374,115 @@ exports.resetPassword = async (req, res) => {
       success: false,
       message: "Unable to reset password",
     });
+  }
+};
+
+function parseLogoBase64(logo) {
+  if (typeof logo !== "string" || !logo.trim()) {
+    return { error: "Logo is required" };
+  }
+
+  const trimmed = logo.trim();
+  const commaIndex = trimmed.indexOf(",");
+  if (!trimmed.startsWith("data:image/") || commaIndex === -1) {
+    return { error: "Logo must be a valid image data URL" };
+  }
+
+  const base64 = trimmed.slice(commaIndex + 1);
+  if (!base64) {
+    return { error: "Logo must be a valid image data URL" };
+  }
+
+  return { base64 };
+}
+
+exports.updateSystemUserLogo = async (req, res) => {
+  const { logo } = req.body || {};
+  const parsed = parseLogoBase64(logo);
+  if (parsed.error) {
+    return res.status(400).json({ success: false, message: parsed.error });
+  }
+
+  const maxBytes = 5 * 1024 * 1024;
+  let buffer;
+  try {
+    buffer = Buffer.from(parsed.base64, "base64");
+  } catch {
+    return res.status(400).json({
+      success: false,
+      message: "Logo must be a valid image data URL",
+    });
+  }
+
+  if (!buffer.length) {
+    return res.status(400).json({
+      success: false,
+      message: "Logo must be a valid image data URL",
+    });
+  }
+
+  if (buffer.length > maxBytes) {
+    return res.status(400).json({
+      success: false,
+      message: "Logo size must be 5 MB or less",
+    });
+  }
+
+  try {
+    const systemUser = await SystemUser.findOne({});
+    if (!systemUser) {
+      return res.status(404).json({
+        success: false,
+        message: "No system user found. Please create a user first.",
+      });
+    }
+
+    systemUser.instituteLogo = logo.trim();
+    await systemUser.save();
+
+    return res.json({
+      success: true,
+      message: "Institute logo updated",
+      user: {
+        id: systemUser._id,
+        name: systemUser.name,
+        email: systemUser.email,
+        instituteName: systemUser.instituteName,
+        instituteLogo: systemUser.instituteLogo || "",
+      },
+    });
+  } catch (err) {
+    console.error("Error updating institute logo:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+exports.deleteSystemUserLogo = async (req, res) => {
+  try {
+    const systemUser = await SystemUser.findOne({});
+    if (!systemUser) {
+      return res.status(404).json({
+        success: false,
+        message: "No system user found. Please create a user first.",
+      });
+    }
+
+    systemUser.instituteLogo = "";
+    await systemUser.save();
+
+    return res.json({
+      success: true,
+      message: "Institute logo removed",
+      user: {
+        id: systemUser._id,
+        name: systemUser.name,
+        email: systemUser.email,
+        instituteName: systemUser.instituteName,
+        instituteLogo: systemUser.instituteLogo || "",
+      },
+    });
+  } catch (err) {
+    console.error("Error deleting institute logo:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
